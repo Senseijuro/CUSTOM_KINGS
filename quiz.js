@@ -1,178 +1,143 @@
 document.addEventListener('DOMContentLoaded', function() {
   var state = getGameState();
-  var hasValidated = false;
-
-  var questions = [
-    { 
-      question: "C'est quoi le liquide qu'on met dans le moteur pour qu'il tourne sans s'abîmer ?", 
-      options: [
-        "Du liquide de refroidissement", 
-        "De l'huile moteur", 
-        "Du liquide de frein",
-        "Du lave-glace"
-      ], 
-      correct: 1 
-    },
-    { 
-      question: "Sous le capot, c'est quoi la pièce principale qui fait avancer la voiture ?", 
-      options: [
-        "La batterie", 
-        "Le radiateur", 
-        "Le moteur", 
-        "L'alternateur"
-      ], 
-      correct: 2 
-    },
-    { 
-      question: "L'objet rond que le conducteur tient pour diriger la voiture, c'est quoi ?", 
-      options: [
-        "Le levier de vitesse", 
-        "Le frein à main", 
-        "Le compteur", 
-        "Le volant"
-      ], 
-      correct: 3 
-    }
-  ];
-
-  var currentQuestion = 0;
-  var correctAnswers = 0;
-
   var locked = document.getElementById('locked');
-  var quizLayout = document.getElementById('quiz-layout');
-  var quizStartBox = document.getElementById('quiz-start-box');
-  var quizContent = document.getElementById('quiz-content');
-  var result = document.getElementById('result');
-  var questionEl = document.getElementById('question');
-  var optionsEl = document.getElementById('options');
-  var progressText = document.getElementById('progress-text');
-  var progressFill = document.getElementById('progress-fill');
-  var backBtn = document.getElementById('back-btn');
-  var btnStartQuiz = document.getElementById('btn-start-quiz');
+  var gameArea = document.getElementById('game-area');
+  var resultDiv = document.getElementById('result');
+  var grid = document.getElementById('memory-grid');
+  var pairsEl = document.getElementById('mem-pairs');
+  var movesEl = document.getElementById('mem-moves');
 
-  // Vérifier si débloqué (après Diagnostic Auto)
+  // Vérifier débloqué
   if (!state.enigme1 || state.enigme1.completed === null) {
-    hasValidated = true;
     if (locked) locked.classList.remove('hidden');
-    if (quizLayout) quizLayout.classList.add('hidden');
-    
-    if (backBtn) {
-      backBtn.addEventListener('click', function(e) {
-        e.preventDefault();
-        window.location.href = 'index.html';
-      });
-    }
+    if (gameArea) gameArea.classList.add('hidden');
     return;
   }
 
   // Si déjà terminé
   if (state.quiz && state.quiz.completed !== null) {
-    hasValidated = true;
-    if (quizLayout) quizLayout.classList.add('hidden');
+    if (gameArea) gameArea.classList.add('hidden');
     if (locked) locked.classList.add('hidden');
     showResult(state.quiz.completed, state.quiz.score || 0);
-    
-    if (backBtn) {
-      backBtn.addEventListener('click', function(e) {
-        e.preventDefault();
-        window.location.href = 'index.html';
-      });
-    }
     return;
   }
-  
-  // S'assurer que le layout est visible
+
   if (locked) locked.classList.add('hidden');
-  if (quizLayout) {
-    quizLayout.classList.remove('hidden');
-    quizLayout.style.display = 'grid';
-  }
-  if (quizStartBox) quizStartBox.classList.remove('hidden');
-  if (quizContent) quizContent.classList.add('hidden');
 
-  // Quitter via bouton retour = GAME OVER
-  if (backBtn) {
-    backBtn.addEventListener('click', function(e) {
-      e.preventDefault();
-      if (!hasValidated) {
-        if (!state.quiz) state.quiz = { completed: null, score: 0 };
-        state.quiz.completed = false;
-        state.quiz.score = 0;
-        saveGameState(state);
-        alert('⚠️ T\'as quitté le quiz. Game over pour cette épreuve !');
-      }
-      window.location.href = 'index.html';
-    });
-  }
+  // 6 paires pièce ↔ métier
+  var pairs = [
+    { piece: '🔧 Moteur',       metier: '👨‍🔧 Mécanicien',     pairId: 1 },
+    { piece: '🎨 Carrosserie',  metier: '🛠️ Carrossier',      pairId: 2 },
+    { piece: '⚡ Batterie',     metier: '🔌 Électricien auto', pairId: 3 },
+    { piece: '🛞 Pneus',        metier: '🏎️ Pneumaticien',    pairId: 4 },
+    { piece: '💨 Échappement',  metier: '🔩 Tuyauteur',       pairId: 5 },
+    { piece: '🪟 Pare-brise',   metier: '🪨 Vitrier auto',    pairId: 6 }
+  ];
 
-  // Quitter via fermeture/navigation = GAME OVER
-  window.addEventListener('beforeunload', function() {
-    if (!hasValidated) {
-      if (!state.quiz) state.quiz = { completed: null, score: 0 };
-      state.quiz.completed = false;
-      state.quiz.score = 0;
-      saveGameState(state);
-    }
+  // Créer les cartes (12 au total)
+  var cards = [];
+  pairs.forEach(function(p) {
+    cards.push({ text: p.piece,  pairId: p.pairId, type: 'piece' });
+    cards.push({ text: p.metier, pairId: p.pairId, type: 'metier' });
   });
 
-  if (btnStartQuiz) {
-    btnStartQuiz.addEventListener('click', function() {
-      if (quizStartBox) quizStartBox.classList.add('hidden');
-      if (quizContent) quizContent.classList.remove('hidden');
-      showQuestion();
-    });
-  }
+  // Mélanger avec ordre persistant
+  var order = getShuffledOrder('quiz', cards.length);
+  var shuffledCards = order.map(function(i) { return cards[i]; });
 
-  function showQuestion() {
-    var q = questions[currentQuestion];
-    if (progressText) progressText.textContent = 'Question ' + (currentQuestion + 1) + '/3';
-    if (progressFill) progressFill.style.width = (((currentQuestion + 1) / 3) * 100) + '%';
-    if (questionEl) questionEl.textContent = q.question;
+  var flippedCards = [];
+  var matchedPairs = 0;
+  var moves = 0;
+  var isChecking = false;
 
-    if (optionsEl) {
-      optionsEl.innerHTML = '';
-      q.options.forEach(function(opt, i) {
-        var btn = document.createElement('button');
-        btn.className = 'quiz-option';
-        btn.textContent = opt;
-        btn.addEventListener('click', function() { selectAnswer(i); });
-        optionsEl.appendChild(btn);
-      });
+  // Générer le DOM
+  shuffledCards.forEach(function(card, index) {
+    var el = document.createElement('div');
+    el.className = 'memory-card';
+    el.dataset.index = index;
+    el.dataset.pairId = card.pairId;
+    el.dataset.type = card.type;
+    el.innerHTML =
+      '<div class="memory-card-inner">' +
+        '<div class="memory-card-front">?</div>' +
+        '<div class="memory-card-back">' + card.text + '</div>' +
+      '</div>';
+    el.addEventListener('click', function() { flipCard(el); });
+    grid.appendChild(el);
+  });
+
+  function flipCard(el) {
+    if (isChecking) return;
+    if (el.classList.contains('flipped') || el.classList.contains('matched')) return;
+    if (flippedCards.length >= 2) return;
+
+    el.classList.add('flipped');
+    flippedCards.push(el);
+
+    if (flippedCards.length === 2) {
+      moves++;
+      updateStats();
+      isChecking = true;
+
+      var a = flippedCards[0];
+      var b = flippedCards[1];
+
+      if (a.dataset.pairId === b.dataset.pairId && a.dataset.type !== b.dataset.type) {
+        // Match !
+        setTimeout(function() {
+          a.classList.add('matched');
+          b.classList.add('matched');
+          matchedPairs++;
+          updateStats();
+          flippedCards = [];
+          isChecking = false;
+
+          if (matchedPairs >= pairs.length) {
+            endGame();
+          }
+        }, 600);
+      } else {
+        // Pas match
+        setTimeout(function() {
+          a.classList.remove('flipped');
+          b.classList.remove('flipped');
+          a.classList.add('no-match');
+          b.classList.add('no-match');
+          setTimeout(function() {
+            a.classList.remove('no-match');
+            b.classList.remove('no-match');
+          }, 300);
+          flippedCards = [];
+          isChecking = false;
+        }, 800);
+      }
     }
   }
 
-  function selectAnswer(selected) {
-    var q = questions[currentQuestion];
-    document.querySelectorAll('.quiz-option').forEach(function(opt, i) {
-      opt.disabled = true;
-      opt.style.pointerEvents = 'none';
-      if (i === q.correct) opt.classList.add('correct');
-      else if (i === selected) opt.classList.add('wrong');
-    });
-    if (selected === q.correct) correctAnswers++;
-
-    setTimeout(function() {
-      currentQuestion++;
-      if (currentQuestion < questions.length) showQuestion();
-      else finishQuiz();
-    }, 1000);
+  function updateStats() {
+    if (pairsEl) pairsEl.textContent = '🎯 ' + matchedPairs + ' / ' + pairs.length + ' paires';
+    if (movesEl) movesEl.textContent = '👆 ' + moves + ' coups';
   }
 
-  function finishQuiz() {
-    hasValidated = true;
-    var success = correctAnswers >= 2;
+  function endGame() {
+    // Réussi si en moins de 20 coups
+    var success = moves <= 20;
     if (!state.quiz) state.quiz = { completed: null, score: 0 };
     state.quiz.completed = success;
-    state.quiz.score = correctAnswers;
+    state.quiz.score = moves;
     saveGameState(state);
-    if (quizLayout) quizLayout.classList.add('hidden');
-    showResult(success, correctAnswers);
+
+    setTimeout(function() {
+      if (gameArea) gameArea.classList.add('hidden');
+      showResult(success, moves);
+    }, 800);
   }
 
   function showResult(success, score) {
-    if (result) result.classList.remove('hidden');
+    if (resultDiv) resultDiv.classList.remove('hidden');
+    if (gameArea) gameArea.classList.add('hidden');
     if (locked) locked.classList.add('hidden');
-    if (quizLayout) quizLayout.classList.add('hidden');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 
     var resultBox = document.getElementById('result-box');
     var resultIcon = document.getElementById('result-icon');
@@ -180,18 +145,20 @@ document.addEventListener('DOMContentLoaded', function() {
     var resultText = document.getElementById('result-text');
     var resultScore = document.getElementById('result-score');
 
-    if (resultScore) resultScore.textContent = 'Score : ' + score + '/3';
+    if (resultScore) resultScore.textContent = 'Terminé en ' + score + ' coups';
 
     if (success) {
       if (resultBox) resultBox.classList.add('success');
       if (resultIcon) resultIcon.textContent = '✓';
-      if (resultTitle) resultTitle.textContent = 'QUIZ VALIDÉ !';
-      if (resultText) resultText.textContent = 'Bien joué ! T\'as débloqué un upgrade dans le garage final.';
+      if (resultTitle) resultTitle.textContent = 'MEMORY RÉUSSI !';
+      if (resultText) resultText.textContent = 'Bien joué ! Tu connais tes pièces et tes métiers. Upgrade débloqué !';
     } else {
       if (resultBox) resultBox.classList.add('fail');
       if (resultIcon) resultIcon.textContent = '✗';
-      if (resultTitle) resultTitle.textContent = 'QUIZ RATÉ';
-      if (resultText) resultText.textContent = 'Il fallait au moins 2 bonnes réponses. L\'upgrade reste verrouillé.';
+      if (resultTitle) resultTitle.textContent = 'TROP DE COUPS';
+      if (resultText) resultText.textContent = 'Il fallait finir en 20 coups max. L\'upgrade reste verrouillé.';
     }
   }
+
+  updateStats();
 });

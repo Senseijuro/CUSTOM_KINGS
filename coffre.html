@@ -3,18 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Coffre Final - Recompenses</title>
+  <title>Coffre Final - Récompenses</title>
   <link rel="stylesheet" href="styles.css">
   <link rel="icon" type="image/jpeg" href="favicon.jpeg">
-  
-  <!-- Musique conditionnelle -->
   <audio id="bg-music" loop>
     <source src="coffre_win.mp3" type="audio/mpeg">
   </audio>
 </head>
 <body>
 
-  <!-- LOADER -->
   <div class="page-loader" id="page-loader">
     <div class="loader-content">
       <div class="loader-logo">
@@ -22,12 +19,12 @@
           <span class="loader-symbol circle"></span>
           <span class="loader-symbol triangle"></span>
           <span class="loader-symbol square"></span>
+          <span class="loader-symbol cross"></span>
+
         </div>
       </div>
       <div class="loader-text">COFFRE FINAL</div>
-      <div class="loader-bar">
-        <div class="loader-progress"></div>
-      </div>
+      <div class="loader-bar"><div class="loader-progress"></div></div>
       <div class="loader-status">Ouverture du coffre...</div>
     </div>
   </div>
@@ -45,7 +42,7 @@
       <div class="game-header">
         <div class="game-icon-large">🏆</div>
         <h1 class="gold">COFFRE FINAL</h1>
-        <p>Recuperez vos recompenses validees</p>
+        <p>Récupérez vos récompenses validées</p>
       </div>
 
       <div class="game-content">
@@ -75,7 +72,6 @@
             </div>
             <div class="reward-status" id="status-enigme1">Verrouillé</div>
           </div>
-
           <div class="reward-card" id="reward-quiz" data-game="quiz">
             <div class="reward-icon">🎁</div>
             <div class="reward-info">
@@ -84,7 +80,6 @@
             </div>
             <div class="reward-status" id="status-quiz">Verrouillé</div>
           </div>
-
           <div class="reward-card" id="reward-enigma" data-game="enigma">
             <div class="reward-icon">🎁</div>
             <div class="reward-info">
@@ -95,7 +90,6 @@
           </div>
         </div>
 
-        <!-- Message zone suivante (affiché quand toutes les épreuves sont terminées) -->
         <div class="next-zone-box hidden" id="next-zone">
           <div class="next-zone-content">
             <span class="next-zone-icon" id="next-zone-icon">🎉</span>
@@ -120,8 +114,8 @@
   <div class="modal" id="modal-success">
     <div class="modal-content success">
       <div class="modal-icon">OK</div>
-      <h3>FELICITATIONS !</h3>
-      <p>Signalez au gerant que vous avez reussi.<br>Vous pouvez recevoir vos prix et continuer.</p>
+      <h3>FÉLICITATIONS !</h3>
+      <p>Signalez au gérant que vous avez réussi.<br>Vous pouvez recevoir vos prix et continuer.</p>
       <button class="btn-primary" id="btn-close-success">CONTINUER</button>
     </div>
   </div>
@@ -129,8 +123,8 @@
   <div class="modal" id="modal-fail">
     <div class="modal-content fail">
       <div class="modal-icon">X</div>
-      <h3>RECOMPENSE VERROUILLEE</h3>
-      <p id="fail-message">Vous devez reussir l'epreuve pour debloquer cette recompense.</p>
+      <h3>RÉCOMPENSE VERROUILLÉE</h3>
+      <p id="fail-message">Vous devez réussir l'épreuve pour débloquer cette récompense.</p>
       <button class="btn-primary" id="btn-close-fail">COMPRIS</button>
     </div>
   </div>
@@ -141,6 +135,7 @@
 
   <script src="loader.js"></script>
   <script src="gameState.js"></script>
+  <script src="globalTimer.js"></script>
   <script src="coffre.js"></script>
   <script src="music.js"></script>
 </body>

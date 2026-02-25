@@ -3,10 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Épreuve 1 - Diagnostic Auto</title>
+  <title>Épreuve 1 - Monte ta Caisse</title>
   <link rel="stylesheet" href="styles.css">
   <link rel="icon" type="image/jpeg" href="favicon.jpeg">
-  
   <audio id="bg-music" loop>
     <source src="enigme_ost.mp3" type="audio/mpeg">
   </audio>
@@ -20,18 +19,18 @@
           <span class="loader-symbol circle"></span>
           <span class="loader-symbol triangle"></span>
           <span class="loader-symbol square"></span>
+          <span class="loader-symbol cross"></span>
+
         </div>
       </div>
-      <div class="loader-text">ÉPREUVE 1 — DIAGNOSTIC</div>
-      <div class="loader-bar">
-        <div class="loader-progress"></div>
-      </div>
-      <div class="loader-status">Scan de la caisse en cours...</div>
+      <div class="loader-text">ÉPREUVE 1 — MONTE TA CAISSE</div>
+      <div class="loader-bar"><div class="loader-progress"></div></div>
+      <div class="loader-status">Ouverture du garage...</div>
     </div>
   </div>
 
   <header class="header">
-    <a href="#" class="back-btn" id="back-btn">← Retour</a>
+    <a href="index.html" class="back-btn" id="back-btn">← Retour</a>
     <div class="header-center">
       <span class="page-badge">ÉPREUVE 1</span>
     </div>
@@ -42,110 +41,53 @@
     <div class="game-container game-container-wide">
       <div class="game-header">
         <div class="game-icon-large">🔧</div>
-        <h1 class="purple">DIAGNOSTIC AUTO</h1>
-        <p>Identifie les pièces cachées pour débloquer le capot de la caisse</p>
+        <h1 class="purple">MONTE TA CAISSE</h1>
+        <p>Glisse les bonnes pièces sur la voiture — attention aux intrus !</p>
       </div>
 
       <div class="game-content">
-        <div class="game-layout-split" id="enigme1-layout" style="display: grid;">
-          <div class="game-col-left">
-            <div class="mission-briefing-box scenario-theme height-match">
-              <div class="briefing-box-header">
-                <span class="briefing-box-icon">🔧</span>
-                <h3>ORDRE DE MISSION</h3>
-                <span class="briefing-box-tag">ÉPREUVE 1</span>
+        <!-- ZONE DE JEU -->
+        <div id="game-area" class="dd-game-area">
+          
+          <div class="dd-score-bar">
+            <span class="dd-score" id="dd-score">0 / 6 pièces placées</span>
+            <span class="dd-errors" id="dd-errors">❌ 0 erreur</span>
+          </div>
+
+          <!-- VOITURE (zones de drop) -->
+          <div class="dd-car-container">
+            <div class="dd-car-silhouette">
+              <!-- Zones de drop sur la voiture -->
+              <div class="dd-drop-zone" id="drop-moteur" data-accept="moteur">
+                <span class="drop-label">💬 "Fait tourner la caisse"</span>
               </div>
-              
-              <div class="briefing-box-content">
-                <div class="mission-context">
-                  <h4>🚗 LA SITUATION</h4>
-                  <p>
-                    Avant de toucher à la caisse, le patron veut savoir si t'as les <strong>bases</strong>. 
-                    Il a planqué <strong>3 devinettes</strong> dans le garage. Trouve les bonnes réponses 
-                    pour prouver que tu mérites d'ouvrir le capot.
-                  </p>
-                </div>
-
-                <div class="mission-objective">
-                  <h4>🧩 LES 3 DEVINETTES DU GARAGE</h4>
-                  <div style="background: rgba(0,0,0,0.2); padding: 0.8rem; border-radius: 8px; margin-bottom: 0.8rem;">
-                    <strong>DEVINETTE 1</strong><br>
-                    <em>"Je suis rond, en caoutchouc, et sans moi la voiture bouge pas.<br>
-                    Je peux être crevé ou gonflé.<br>
-                    Qui suis-je ?"</em><br>
-                  </div>
-                  <div style="background: rgba(0,0,0,0.2); padding: 0.8rem; border-radius: 8px; margin-bottom: 0.8rem;">
-                    <strong>DEVINETTE 2</strong><br>
-                    <em>"Je suis sous le capot et je fais tourner la voiture.<br>
-                    Sans moi, la caisse démarre pas.<br>
-                    Qui suis-je ?"</em><br>
-                  </div>
-                  <div style="background: rgba(0,0,0,0.2); padding: 0.8rem; border-radius: 8px;">
-                    <strong>DEVINETTE 3</strong><br>
-                    <em>"Je suis un objet rond que le conducteur tient dans ses mains.<br>
-                    Je sers à tourner à gauche ou à droite.<br>
-                    Qui suis-je ?"</em><br>
-                  </div>
-                </div>
-
-                <div class="mission-rules">
-                  <h4>📜 RÈGLES DU GARAGE</h4>
-                  <ul>
-                    <li><span class="rule-icon">⏱️</span> Trouve les réponses avant la fin du chrono</li>
-                    <li><span class="rule-icon">🤝</span> Bosse avec ton équipe</li>
-                    <li><span class="rule-icon">🚫</span> Quitter la page = Game Over direct</li>
-                    <li><span class="rule-icon">💡</span> Un indice dispo auprès du maître du jeu</li>
-                  </ul>
-                </div>
-
-                <div class="mission-reward">
-                  <h4>🏆 UPGRADE À DÉBLOQUER</h4>
-                  <div class="reward-preview">
-                    <span class="reward-icon-box">🔧</span>
-                    <div class="reward-details">
-                      <strong>Upgrade mystère</strong>
-                      <span>À découvrir dans le garage final</span>
-                    </div>
-                  </div>
-                </div>
+              <div class="dd-drop-zone" id="drop-pneus" data-accept="pneus">
+                <span class="drop-label">💬 "4 en caoutchouc sur la route"</span>
+              </div>
+              <div class="dd-drop-zone" id="drop-volant" data-accept="volant">
+                <span class="drop-label">💬 "Entre tes mains pour diriger"</span>
+              </div>
+              <div class="dd-drop-zone" id="drop-phares" data-accept="phares">
+                <span class="drop-label">💬 "Éclairent la nuit"</span>
+              </div>
+              <div class="dd-drop-zone" id="drop-echappement" data-accept="echappement">
+                <span class="drop-label">💬 "Évacue les gaz à l'arrière"</span>
+              </div>
+              <div class="dd-drop-zone" id="drop-batterie" data-accept="batterie">
+                <span class="drop-label">💬 "Donne l'énergie pour démarrer"</span>
               </div>
             </div>
           </div>
 
-          <div class="game-col-right">
-            <div class="game-content-inner height-match">
-              <div class="timer-section-centered">
-                <div class="warning-box" id="warning-box">
-                  <span class="warning-icon">⚠️</span>
-                  <p>Une fois le chrono lancé, si tu quittes la page, c'est game over automatique !</p>
-                </div>
-
-                <div class="timer-container">
-                  <div class="timer-display">
-                    <span class="timer-num" id="timer-min">05</span>
-                    <span class="timer-sep">:</span>
-                    <span class="timer-num" id="timer-sec">00</span>
-                  </div>
-                  <span class="timer-label">TEMPS RESTANT</span>
-                </div>
-
-                <button class="btn-primary" id="btn-start">LANCER LE CHRONO</button>
-
-                <div class="validation-container hidden" id="validation">
-                  <div class="validation-box">
-                    <h3>⏱️ Temps écoulé !</h3>
-                    <p>T'as trouvé les 3 réponses ?</p>
-                    <div class="validation-btns">
-                      <button class="btn-success" id="btn-yes">OUI, C'EST BON</button>
-                      <button class="btn-fail" id="btn-no">NON, J'AI PAS TROUVÉ</button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+          <!-- PIÈCES À GLISSER -->
+          <div class="dd-parts-tray" id="parts-tray">
+            <!-- Rempli par JS -->
           </div>
+
+          <p class="dd-hint">👆 Lis l'indice sur chaque emplacement et glisse la bonne pièce dessus. Attention aux <strong>intrus</strong> !</p>
         </div>
 
+        <!-- RÉSULTAT -->
         <div class="result-container-full hidden" id="result">
           <div class="result-box" id="result-box">
             <div class="result-icon" id="result-icon"></div>
@@ -160,6 +102,7 @@
 
   <script src="loader.js"></script>
   <script src="gameState.js"></script>
+  <script src="globalTimer.js"></script>
   <script src="enigme1.js"></script>
   <script src="music.js"></script>
 </body>
